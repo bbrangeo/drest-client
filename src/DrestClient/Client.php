@@ -400,13 +400,13 @@ class Client
      * @return LoggerInterface
      */
     public function getLogger(){
-        return $this->_logger;
+        return $this->logger;
     }
     /**
      * Set the logger used
      * @param \Psr\Log\LoggerInterface $logger
      */
     public function setLogger(LoggerInterface $logger){
-        $this->_logger = $logger;
+        $this->logger = $logger;
     }
 }

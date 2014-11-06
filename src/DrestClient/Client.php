@@ -6,9 +6,16 @@ use DrestCommon\Representation\AbstractRepresentation;
 use DrestCommon\Representation\RepresentationException;
 use Guzzle\Http\Client as GuzzleClient;
 use Guzzle\Http\Exception\BadResponseException;
+use Psr\Log\LoggerInterface;
+use Guzzle\Http\Message\Response;
 
 class Client
 {
+    /**
+     * The logger used to log request and response
+     * @var Psr\Log\LoggerInterface 
+     */
+    protected $logger = null;
     /**
      * The transport to be used
      * @var GuzzleClient
@@ -103,7 +110,9 @@ class Client
         );
 
         try {
+            $this->logRequest('GET', $request, $representation);
             $response = $this->transport->send($request);
+            $this->logResponse('GET', $response);
         } catch (BadResponseException $exception) {
             throw $this->handleErrorResponse($exception);
         }
@@ -139,7 +148,9 @@ class Client
         $request->setHeader('Content-Type', $representation->getContentType());
 
         try {
+            $this->logRequest('POST', $request, $representation);
             $response = $this->transport->send($request);
+            $this->logResponse('POST', $response);
         } catch (BadResponseException $exception) {
             throw $this->handleErrorResponse($exception);
         }
@@ -173,7 +184,9 @@ class Client
         $request->setHeader('Content-Type', $representation->getContentType());
 
         try {
+            $this->logRequest('PUT', $request, $representation);
             $response = $this->transport->send($request);
+            $this->logResponse('PUT', $response);
         } catch (BadResponseException $exception) {
             throw $this->handleErrorResponse($exception);
         }
@@ -207,7 +220,9 @@ class Client
         $request->setHeader('Content-Type', $representation->getContentType());
 
         try {
+            $this->logRequest('PATCH', $request, $representation);
             $response = $this->transport->send($request);
+            $this->logResponse('PATCH', $response);
         } catch (BadResponseException $exception) {
             throw $this->handleErrorResponse($exception);
         }
@@ -222,7 +237,24 @@ class Client
      */
     public function delete($path, array $headers = array())
     {
-        $this->transport->delete($path, $headers);
+        $representation = $this->getRepresentationInstance();
+
+        $headers['Accept'] = $representation->getContentType();
+        $request = $this->transport->delete(
+            $path,
+            $headers
+        );
+
+        try {
+            $this->logRequest('DELETE', $request, $representation);
+            $response = $this->transport->send($request);
+            $this->logResponse('DELETE', $response);
+        } catch (BadResponseException $exception) {
+            throw $this->handleErrorResponse($exception);
+        }
+
+        $representation = $representation::createFromString($response->getBody(true));
+        return new Response($representation, $response);
     }
 
     /**
@@ -324,5 +356,57 @@ class Client
             parse_str($urlParts[1], $vars);
         }
         return $vars;
+    }
+    /**
+     * Log some parameters of the request
+     * @param string $type HTTP Method 
+     * @param \Guzzle\Http\Message\RequestInterface $request
+     * @param \DrestCommon\Representation\AbstractRepresentation $representation
+     */
+    protected function logRequest($type, $request, AbstractRepresentation $representation){
+        $context = array(
+            'headers'   => $request->getRawHeaders(),
+            'params'    => $request->getParams()->toArray(),
+            'body'      => $representation->__toString()
+        );
+        $this->log('Request '.$type, $context);
+    }
+    /**
+     * Log some parameters of the response
+     * @param string $type
+     * @param \Guzzle\Http\Message\Response $response
+     */
+    protected function logResponse($type, Response $response){
+        $context = array(
+            'headers'   => $response->getRawHeaders(),
+            'params'    => $response->getParams()->toArray(),
+            'body'      => $response->getBody(true)
+        );
+        $this->log('Response '.$type, $context);
+    }
+    /**
+     * Log parameters if the logger is set
+     * @param string $message
+     * @param array $vars
+     */
+    protected function log($message, array $vars){
+        $logger = $this->getLogger();
+        if($logger instanceof LoggerInterface){
+            $this->getLogger()->debug($message, $vars);
+        }
+    }
+    /**
+     * 
+     * @return LoggerInterface
+     */
+    public function getLogger(){
+        return $this->_logger;
+    }
+    /**
+     * Set the logger used
+     * @param \Psr\Log\LoggerInterface $logger
+     */
+    public function setLogger(LoggerInterface $logger){
+        $this->_logger = $logger;
     }
 }

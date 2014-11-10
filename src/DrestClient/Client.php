@@ -117,8 +117,7 @@ class Client
             throw $this->handleErrorResponse($exception);
         }
 
-        $representation = $representation::createFromString($response->getBody(true));
-        return new Response($representation, $response);
+        return $response->getBody(true);
     }
 
     /**
@@ -155,7 +154,7 @@ class Client
             throw $this->handleErrorResponse($exception);
         }
 
-        return new Response($representation, $response);
+        return $response->getBody(true);
     }
 
     /**
@@ -191,7 +190,7 @@ class Client
             throw $this->handleErrorResponse($exception);
         }
 
-        return new Response($representation, $response);
+         return $response->getBody(true);
     }
 
     /**
@@ -227,7 +226,7 @@ class Client
             throw $this->handleErrorResponse($exception);
         }
 
-        return new Response($representation, $response);
+         return $response->getBody(true);
     }
 
     /**
@@ -253,8 +252,7 @@ class Client
             throw $this->handleErrorResponse($exception);
         }
 
-        $representation = $representation::createFromString($response->getBody(true));
-        return new Response($representation, $response);
+         return $response->getBody(true);
     }
 
     /**

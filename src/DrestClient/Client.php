@@ -114,6 +114,7 @@ class Client
             $response = $this->transport->send($request);
             $this->logResponse('GET', $response);
         } catch (BadResponseException $exception) {
+            $this->logError('GET', $exception);
             throw $this->handleErrorResponse($exception);
         }
 
@@ -138,7 +139,6 @@ class Client
             $headers,
             $representation->__toString()
         );
-
         foreach ($this->getVarsFromPath($path) as $key => $value) {
             $request->setPostField($key, $value);
         }
@@ -151,6 +151,7 @@ class Client
             $response = $this->transport->send($request);
             $this->logResponse('POST', $response);
         } catch (BadResponseException $exception) {
+            $this->logError('POST', $exception);
             throw $this->handleErrorResponse($exception);
         }
 
@@ -187,6 +188,7 @@ class Client
             $response = $this->transport->send($request);
             $this->logResponse('PUT', $response);
         } catch (BadResponseException $exception) {
+            $this->logError('PUT', $exception);
             throw $this->handleErrorResponse($exception);
         }
 
@@ -223,6 +225,7 @@ class Client
             $response = $this->transport->send($request);
             $this->logResponse('PATCH', $response);
         } catch (BadResponseException $exception) {
+            $this->logError('PATCH', $exception);
             throw $this->handleErrorResponse($exception);
         }
 
@@ -249,6 +252,7 @@ class Client
             $response = $this->transport->send($request);
             $this->logResponse('DELETE', $response);
         } catch (BadResponseException $exception) {
+            $this->logError('DELETE', $exception);
             throw $this->handleErrorResponse($exception);
         }
 
@@ -381,6 +385,15 @@ class Client
             'body'      => $response->getBody(true)
         );
         $this->log('Response '.$type, $context);
+    }
+
+
+    protected function logError($type, $exception){
+        $context = array(
+            'message'   => $exception->getMessage(),
+            'response' => $exception->getResponse()->getMessage()
+        );
+        $this->log('ERROR '.$type, $context);
     }
     /**
      * Log parameters if the logger is set

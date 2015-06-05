@@ -393,7 +393,10 @@ class Client
             'message'   => $exception->getMessage(),
             'response' => $exception->getResponse()->getMessage()
         );
-        $this->log('ERROR '.$type, $context);
+        $logger = $this->getLogger();
+        if($logger instanceof LoggerInterface){
+            $this->getLogger()->error('ERROR '.$type, $context);
+        }
     }
     /**
      * Log parameters if the logger is set

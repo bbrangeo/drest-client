@@ -68,6 +68,9 @@ EOT
             null,
             array('X-DrestCG' => 'true')
         );
+        
+        $request->getCurlOptions()->set(CURLOPT_SSL_VERIFYHOST, false);
+        $request->getCurlOptions()->set(CURLOPT_SSL_VERIFYPEER, false);
 
         $response = $client->send($request);
         if (!$response->isSuccessful()) {

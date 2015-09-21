@@ -51,7 +51,9 @@ class Client
         }
 
         $this->setRepresentationClass($representation);
-        $this->transport = new GuzzleClient($endpoint);
+        $this->transport = new GuzzleClient($endpoint, array(
+            'ssl.certificate_authority' => false
+        ));
     }
 
     /**
